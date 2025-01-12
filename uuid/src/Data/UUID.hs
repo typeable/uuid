@@ -18,9 +18,6 @@ See <http://tools.ietf.org/html/rfc4122> for the specification.
 favorite instance of 'System.Random.Random' for faster but insecure
 generation of UUIDs.
 
-* We have an implementation of generating a UUID from the hardware
-MAC address and current system time in "Data.UUID.V1".
-
 * For name-based generation of UUIDs using SHA-1 hashing see
 "Data.UUID.V5".
 -}

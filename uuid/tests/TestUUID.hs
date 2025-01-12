@@ -1,18 +1,15 @@
 {-# LANGUAGE ViewPatterns #-}
 
-import Control.Monad (replicateM)
 import Data.Bits
 import qualified Data.ByteString.Lazy as BL
 import Data.Char (ord)
-import Data.List (nub, (\\))
 import Data.Maybe
 import Data.Word
 import qualified Data.UUID as U
-import qualified Data.UUID.V1 as U
 import qualified Data.UUID.V3 as U3
 import qualified Data.UUID.V5 as U5
 
-import Test.QuickCheck ( Arbitrary(arbitrary), choose )
+import Test.QuickCheck ( Arbitrary(arbitrary) )
 import Test.Tasty ( TestTree, testGroup, defaultMain )
 import Test.Tasty.HUnit
       ( assertBool, (@?=), testCase )
@@ -24,30 +21,19 @@ isValidVersion :: Int -> U.UUID -> Bool
 isValidVersion v u = lenOK && variantOK && versionOK
     where bs = U.toByteString u
           lenOK = BL.length bs == 16
-          variantOK = (BL.index bs 8) .&. 0xc0 == 0x80
-          versionOK = (BL.index bs 6) .&. 0xf0 == fromIntegral (v `shiftL` 4)
+          variantOK = BL.index bs 8 .&. 0xc0 == 0x80
+          versionOK = BL.index bs 6 .&. 0xf0 == fromIntegral (v `shiftL` 4)
 
 
 instance Arbitrary U.UUID where
     -- the UUID random instance ignores bounds
-    arbitrary = choose (U.nil, U.nil)
+    arbitrary = pure U.nil
 
 
 test_null :: Test
 test_null =
   testCase "namespaceDNS is not null" $
   assertBool "" (not $ U.null U3.namespaceDNS)
-
-test_v1 :: [Maybe U.UUID] -> Test
-test_v1 v1s = testGroup "version 1" [
-    testCase  "V1 unique"   $ nub (v1s \\ nub v1s) @?= [],
-    testGroup "V1 not null" $ map (testUUID (not . U.null))  v1s,
-    testGroup "V1 valid"    $ map (testUUID (isValidVersion 1)) v1s
-    ]
-    where testUUID :: (U.UUID -> Bool) -> Maybe U.UUID -> Test
-          testUUID p u =
-            testCase (show u) $
-            assertBool "" $ maybe False p u
 
 test_v3 :: Test
 test_v3 =
@@ -93,13 +79,11 @@ prop_v5Valid = testProperty "V5 valid" v5Valid
 
 main :: IO ()
 main = do
-    v1s <- replicateM 100 U.nextUUID
     defaultMain $
      testGroup "tests" $
      concat $
      [ [
         test_null,
-        test_v1 v1s,
         test_v3,
         test_v5
         ]

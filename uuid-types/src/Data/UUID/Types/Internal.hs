@@ -46,13 +46,11 @@ module Data.UUID.Types.Internal
 
 import           Prelude                          hiding (null)
 
-import           Control.Applicative              ((<*>))
 import           Control.DeepSeq                  (NFData (..))
 import           Control.Monad                    (guard, liftM2)
 import           Data.Bits
 import           Data.Char
 import           Data.Data
-import           Data.Functor                     ((<$>))
 import           Data.Hashable
 import           Data.List                        (elemIndices)
 import           Foreign.Ptr                      (Ptr)
@@ -79,7 +77,7 @@ import Language.Haskell.TH.Syntax (Lift)
 -- | Type representing <https://en.wikipedia.org/wiki/UUID Universally Unique Identifiers (UUID)> as specified in
 --  <http://tools.ietf.org/html/rfc4122 RFC 4122>.
 data UUID = UUID {-# UNPACK #-} !Word64 {-# UNPACK #-} !Word64
-          deriving (Eq, Ord, Typeable)
+          deriving (Eq, Ord)
 {-
     Prior to uuid-types-1.0.4:
          !Word32 !Word32 !Word32 !Word32
